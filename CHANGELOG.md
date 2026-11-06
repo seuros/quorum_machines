@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/seuros/quorum_machines/compare/quorum_machines/v0.1.1...quorum_machines/v0.1.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* cross builds no longer compile for the host ([084aeb6](https://github.com/seuros/quorum_machines/commit/084aeb6fe3749ff30cc6322e2fd00514c7bb3716))
+
 ## [0.1.1](https://github.com/seuros/quorum_machines/compare/quorum_machines-v0.1.0...quorum_machines/v0.1.1) (2026-11-06)
 
 
