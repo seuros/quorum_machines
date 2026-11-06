@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/seuros/quorum_machines/compare/quorum_machines/v0.1.2...quorum_machines/v0.1.3) (2026-11-06)
+
+
+### Bug Fixes
+
+* keep test sources out of the packaged gem and crate ([0157188](https://github.com/seuros/quorum_machines/commit/0157188143615bee19c5c09578df1dc1cae368c0))
+
 ## [0.1.2](https://github.com/seuros/quorum_machines/compare/quorum_machines/v0.1.1...quorum_machines/v0.1.2) (2026-11-06)
 
 
