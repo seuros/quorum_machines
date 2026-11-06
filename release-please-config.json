@@ -1,0 +1,16 @@
+{
+  "plugins": ["cargo-workspace"],
+  "packages": {
+    ".": {
+      "release-type": "ruby",
+      "package-name": "quorum_machines",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true
+    },
+    "ext/quorum_machines_native/core": {
+      "release-type": "rust",
+      "package-name": "quorum-machines",
+      "bump-minor-pre-major": true
+    }
+  }
+}

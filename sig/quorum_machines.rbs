@@ -1,0 +1,12 @@
+module QuorumMachines
+  VERSION: String
+  MAX_MEMBERS: Integer
+  def self.intersects?: (members: Integer, reads: Integer, writes: Integer) -> bool
+  class Quorum
+    def self.new: (members: Integer, required: Integer) -> instance
+    def acknowledge: (Integer) -> bool
+    def count: () -> Integer
+    def reached?: () -> bool
+    def reset: () -> nil
+  end
+end
