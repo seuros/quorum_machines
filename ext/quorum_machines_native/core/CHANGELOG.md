@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.2.1...quorum-machines-v0.2.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* crates.io keywords and categories for the core ([e44f52f](https://github.com/seuros/quorum_machines/commit/e44f52ff6146189773c81ab45182ea3e535e600b))
+
 ## [0.2.1](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.2.0...quorum-machines-v0.2.1) (2026-11-06)
 
 
