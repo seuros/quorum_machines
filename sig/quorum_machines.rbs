@@ -1,12 +1,45 @@
 module QuorumMachines
   VERSION: String
-  MAX_MEMBERS: Integer
-  def self.intersects?: (members: Integer, reads: Integer, writes: Integer) -> bool
+
+  # The core's `Acknowledgement`: what an honoured acknowledge did.
+  # :counted, the member is new this round and the count went up by one.
+  # :duplicate, the member had already acknowledged this round; nothing changed.
+  type acknowledgement = :counted | :duplicate
+
+  # The core's `Refusal`: the call was not honoured and changed nothing.
+  # :unknown_member, the index names no seat of the membership.
+  type refusal = :unknown_member
+
+  # The core's `intersects(members, reads, writes)`. Pure arithmetic; answers
+  # false for a zero threshold or one larger than the membership.
+  def self.intersects?: (Integer members, Integer reads, Integer writes) -> bool
+
+  # The core's `Quorum<64>`.
   class Quorum
-    def self.new: (members: Integer, required: Integer) -> instance
-    def acknowledge: (Integer) -> bool
-    def count: () -> Integer
+    # Most seats a membership can hold: the core's `Quorum::CAPACITY`.
+    CAPACITY: Integer
+
+    # The core's `Quorum::new(members, required)`. Raises RangeError unless
+    # 1 <= required <= members <= CAPACITY, TypeError for a non-Integer.
+    def self.new: (Integer members, Integer required) -> Quorum
+
+    # The core's `Quorum::majority(members)`: required is members / 2 + 1.
+    # Raises RangeError unless 1 <= members <= CAPACITY.
+    def self.majority: (Integer members) -> Quorum
+
+    # Answers :counted or :duplicate when honoured, :unknown_member when
+    # refused. Never true, false or nil. Raises TypeError for a non-Integer,
+    # RangeError for a negative one, FrozenError on a frozen tracker.
+    def acknowledge: (Integer member) -> (acknowledgement | refusal)
+
+    # Whether the member has acknowledged this round; false off the roster.
+    def acknowledged?: (Integer member) -> bool
     def reached?: () -> bool
+    def count: () -> Integer
+    def members: () -> Integer
+    def required: () -> Integer
+
+    # Starts another round. Always honoured; raises FrozenError when frozen.
     def reset: () -> nil
   end
 end
