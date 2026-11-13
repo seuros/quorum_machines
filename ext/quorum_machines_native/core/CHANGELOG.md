@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.2.2...quorum-machines-v0.3.0) (2026-11-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* converted to the fleet conventions. One exhaustive Refusal per crate, Result from every operation that can refuse, a refusal changes nothing, provable idempotent repeats are honoured, Ruby mirrors the core. No compatibility aliases. Quorum::new(members, required) and majority(members); a duplicate ack says so.
+
+### Features
+
+* answer acknowledge with Result&lt;Acknowledgement, Refusal&gt; and move the roster into the core ([4c018ca](https://github.com/seuros/quorum_machines/commit/4c018caa889d01bf9f8d111e264ae9681c182d9a))
+
 ## [0.2.2](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.2.1...quorum-machines-v0.2.2) (2026-11-06)
 
 
