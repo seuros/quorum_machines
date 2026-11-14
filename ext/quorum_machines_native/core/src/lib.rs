@@ -74,10 +74,12 @@ impl<const N: usize> Quorum<N> {
     /// [`Refusal::UnknownMember`] when `member` is not below
     /// [`Self::members`]; nothing changed.
     pub fn acknowledge(&mut self, member: usize) -> Result<Acknowledgement, Refusal> {
-        if member >= self.members {
+        // One check, so no arm exists that the roster bound already ruled out:
+        // a seat is known when it is on the roster (`members <= N`).
+        let on_roster = member < self.members;
+        let Some(seen) = self.seen.get_mut(member).filter(|_| on_roster) else {
             return Err(Refusal::UnknownMember);
-        }
-        let seen = self.seen.get_mut(member).ok_or(Refusal::UnknownMember)?;
+        };
         if *seen {
             return Ok(Acknowledgement::Duplicate);
         }

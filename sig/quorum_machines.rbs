@@ -1,3 +1,6 @@
+# Counts and seat indices are Integers: TypeError for anything else, RangeError
+# for a negative one or a configuration the core rejects. Both messages name
+# the argument.
 module QuorumMachines
   VERSION: String
 

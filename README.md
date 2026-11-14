@@ -162,29 +162,30 @@ Run it in a test against your configuration so nobody tunes `reads` down to 1 "f
 
 ## The Rules of the Relay
 
-- **Membership is 1 to 64** seats, indexed from zero. `Quorum::CAPACITY` holds the ceiling.
+- **Membership is 1 to 64** seats, indexed from zero. `Quorum::CAPACITY` holds the ceiling. It is the core's own `Quorum::CAPACITY`, the const generic `N` this gem compiles as 64, not a rule Ruby adds.
 - **`required` is 1 to `members`.** Zero, more than the roster, or a roster past the ceiling raises `RangeError`.
 - **Arguments are positional**, in the core's order: `Quorum.new(members, required)`, `Quorum.majority(members)`, `intersects?(members, reads, writes)`. There are no keywords and no defaults.
-- **Integers only.** A Float member or threshold raises `TypeError`. A negative member raises `RangeError`.
+- **Integers only.** A Float member or threshold raises `TypeError`. A negative member raises `RangeError`. The message names the argument, so a Hash passed where `members` belongs says `members must be an Integer, not Hash`. `ArgumentError` only ever comes from Ruby itself, for arity.
+- **Conversions come first.** Every argument is checked before the core is asked, and afterwards the binding only turns the core's answer into a symbol, so a raise never costs an acknowledgement.
 - **A refusal is a symbol, never an exception, and changes nothing.** Acknowledging a seat past the roster answers `:unknown_member`.
 - **A repeat is honoured.** The tracker keeps one mark per seat, so it knows a member already answered and says `:duplicate`. Nothing changes.
-- **No ids, no clock.** Member indices are yours; the tracker issues nothing and never reads the time.
+- **No ids, no clock.** Member indices are yours; the tracker issues nothing and never reads the time. No answer in the table below records a clock.
 - **Frozen means frozen.** `freeze` the tracker and `acknowledge` or `reset` raise `FrozenError`.
 
 ### Every answer
 
 A call that is honoured answers with a value. A call that is not honoured answers with a refusal symbol, the snake_case of the core's `Refusal` variant, and changes nothing. There is no catch-all symbol.
 
-| Call | Honoured | Refusals |
-| --- | --- | --- |
-| `Quorum.new(members, required)` | `Quorum` | none; a bad configuration raises `RangeError` |
-| `Quorum.majority(members)` | `Quorum` | none; a bad configuration raises `RangeError` |
-| `acknowledge(member)` | `:counted`, `:duplicate` (already acknowledged this round) | `:unknown_member` |
-| `reset` | `nil` | none |
-| `acknowledged?(member)` | `true`, `false` | none, a query |
-| `reached?` | `true`, `false` | none, a query |
-| `count`, `members`, `required` | `Integer` | none, a query |
-| `QuorumMachines.intersects?(members, reads, writes)` | `true`, `false` | none, a query |
+| Call | Honoured | Refusals | Records the clock |
+| --- | --- | --- | --- |
+| `Quorum.new(members, required)` | `Quorum` | none; a bad configuration raises `RangeError` | no |
+| `Quorum.majority(members)` | `Quorum` | none; a bad configuration raises `RangeError` | no |
+| `acknowledge(member)` | `:counted`, `:duplicate` (already acknowledged this round) | `:unknown_member` | no |
+| `reset` | `nil` | none | no |
+| `acknowledged?(member)` | `true`, `false` | none, a query | no |
+| `reached?` | `true`, `false` | none, a query | no |
+| `count`, `members`, `required` | `Integer` | none, a query | no |
+| `QuorumMachines.intersects?(members, reads, writes)` | `true`, `false` | none, a query | no |
 
 ## What You Think You're Doing vs Reality
 

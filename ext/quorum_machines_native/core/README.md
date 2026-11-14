@@ -53,4 +53,4 @@ assert!(votes.reached());
 - **Queries.** `reached`, `count`, `members`, `required`, `acknowledged` and
   `intersects` are pure and answer plain values.
 - **No ids, no time.** Member indices are supplied by the caller; the tracker
-  issues nothing and reads no clock.
+  issues nothing and reads no clock. No answer records one.

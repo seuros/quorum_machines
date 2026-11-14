@@ -8,19 +8,21 @@ const CAPACITY: usize = 64;
 
 type Core = Quorum<CAPACITY>;
 
-#[derive(Clone, Copy)]
-struct Count(usize);
-
-impl TryConvert for Count {
-    fn try_convert(value: Value) -> Result<Self, Error> {
-        if Integer::from_value(value).is_none() {
-            return Err(Error::new(
-                Ruby::get_with(value).exception_type_error(),
-                "expected an Integer",
-            ));
-        }
-        usize::try_convert(value).map(Self)
+/// A count or seat index, named in every message so the caller sees which
+/// argument was wrong. A Hash here is a caller who used keywords.
+fn count(ruby: &Ruby, value: Value, name: &str) -> Result<usize, Error> {
+    if Integer::from_value(value).is_none() {
+        return Err(Error::new(
+            ruby.exception_type_error(),
+            format!("{name} must be an Integer, not {}", value.class()),
+        ));
     }
+    usize::try_convert(value).map_err(|_| {
+        Error::new(
+            ruby.exception_range_error(),
+            format!("{name} must be in 0..={}", usize::MAX),
+        )
+    })
 }
 
 const fn refusal(refusal: Refusal) -> &'static str {
@@ -44,27 +46,33 @@ impl Tracker {
         core.map(|core| Self(RefCell::new(core))).ok_or_else(|| {
             Error::new(
                 ruby.exception_range_error(),
-                "require 1 <= required <= members <= 64",
+                format!("members and required must satisfy 1 <= required <= members <= {CAPACITY}"),
             )
         })
     }
 
-    fn new(ruby: &Ruby, members: Count, required: Count) -> Result<Self, Error> {
-        Self::build(ruby, Core::new(members.0, required.0))
+    fn new(ruby: &Ruby, members: Value, required: Value) -> Result<Self, Error> {
+        let members = count(ruby, members, "members")?;
+        let required = count(ruby, required, "required")?;
+        Self::build(ruby, Core::new(members, required))
     }
 
-    fn majority(ruby: &Ruby, members: Count) -> Result<Self, Error> {
-        Self::build(ruby, Core::majority(members.0))
+    fn majority(ruby: &Ruby, members: Value) -> Result<Self, Error> {
+        let members = count(ruby, members, "members")?;
+        Self::build(ruby, Core::majority(members))
     }
 
-    fn acknowledge(ruby: &Ruby, this: Obj<Self>, member: Count) -> Result<Symbol, Error> {
+    fn acknowledge(ruby: &Ruby, this: Obj<Self>, member: Value) -> Result<Symbol, Error> {
         this.check_frozen()?;
-        let outcome = this.0.borrow_mut().acknowledge(member.0);
+        // Every conversion happens before the core is asked.
+        let member = count(ruby, member, "member")?;
+        let outcome = this.0.borrow_mut().acknowledge(member);
         Ok(ruby.to_symbol(outcome.map_or_else(refusal, acknowledgement)))
     }
 
-    fn acknowledged(&self, member: Count) -> bool {
-        self.0.borrow().acknowledged(member.0)
+    fn acknowledged(ruby: &Ruby, this: &Self, member: Value) -> Result<bool, Error> {
+        let member = count(ruby, member, "member")?;
+        Ok(this.0.borrow().acknowledged(member))
     }
 
     fn reached(&self) -> bool {
@@ -90,8 +98,11 @@ impl Tracker {
     }
 }
 
-const fn intersects(members: Count, reads: Count, writes: Count) -> bool {
-    quorum_machines::intersects(members.0, reads.0, writes.0)
+fn intersects(ruby: &Ruby, members: Value, reads: Value, writes: Value) -> Result<bool, Error> {
+    let members = count(ruby, members, "members")?;
+    let reads = count(ruby, reads, "reads")?;
+    let writes = count(ruby, writes, "writes")?;
+    Ok(quorum_machines::intersects(members, reads, writes))
 }
 
 #[magnus::init]

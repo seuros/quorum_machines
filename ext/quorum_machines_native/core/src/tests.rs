@@ -3,9 +3,14 @@ mod model;
 
 use super::*;
 
+/// A fresh majority of five: three distinct acknowledgements reach it.
+fn five() -> Quorum<5> {
+    Quorum::majority(5).expect("valid quorum")
+}
+
 #[test]
 fn distinct_members_not_messages_reach_majority() {
-    let mut quorum = Quorum::<5>::majority(5).expect("valid quorum");
+    let mut quorum = five();
     assert_eq!(quorum.acknowledge(0), Ok(Acknowledgement::Counted));
     let once = quorum.clone();
     for _ in 0..10 {
@@ -25,7 +30,7 @@ fn distinct_members_not_messages_reach_majority() {
 
 #[test]
 fn an_unknown_member_is_refused_and_changes_nothing() {
-    let mut quorum = Quorum::<5>::majority(5).expect("valid quorum");
+    let mut quorum = five();
     assert_eq!(quorum.acknowledge(1), Ok(Acknowledgement::Counted));
     let before = quorum.clone();
     for member in [5, 6, usize::MAX] {
@@ -52,19 +57,22 @@ fn a_seat_past_the_membership_is_unknown_even_within_capacity() {
 
 #[test]
 fn thresholds_and_intersection_handle_boundaries() {
-    assert!(Quorum::<0>::majority(0).is_none());
-    assert!(Quorum::<3>::majority(0).is_none());
-    assert!(Quorum::<3>::majority(4).is_none());
-    assert!(Quorum::<3>::new(3, 0).is_none());
-    assert!(Quorum::<3>::new(3, 4).is_none());
-    assert!(Quorum::<3>::new(2, 3).is_none());
-    assert!(Quorum::<3>::new(4, 2).is_none());
-    assert!(Quorum::<3>::new(usize::MAX, 1).is_none());
+    assert_eq!(Quorum::<0>::majority(0), None);
+    for members in [0, 4] {
+        assert_eq!(Quorum::<3>::majority(members), None);
+    }
+    for (members, required) in [(3, 0), (3, 4), (2, 3), (4, 2), (usize::MAX, 1)] {
+        assert_eq!(Quorum::<3>::new(members, required), None);
+    }
     assert!(Quorum::<3>::new(3, 3).is_some());
-    assert!(intersects(5, 3, 3));
-    assert!(!intersects(5, 2, 3));
-    assert!(!intersects(0, 0, 0));
-    assert!(intersects(usize::MAX, usize::MAX, 1));
+    for (members, reads, writes, answer) in [
+        (5, 3, 3, true),
+        (5, 2, 3, false),
+        (0, 0, 0, false),
+        (usize::MAX, usize::MAX, 1, true),
+    ] {
+        assert_eq!(intersects(members, reads, writes), answer);
+    }
 }
 
 #[test]
