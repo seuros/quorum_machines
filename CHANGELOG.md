@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/seuros/quorum_machines/compare/quorum_machines/v0.3.1...quorum_machines/v0.3.2) (2026-11-14)
+
+
+### Bug Fixes
+
+* **deps:** require matryona-machines &gt;= 0.4 ([ee5959f](https://github.com/seuros/quorum_machines/commit/ee5959fb73211bb6e1220683299496cc35540e55))
+
 ## [0.3.1](https://github.com/seuros/quorum_machines/compare/quorum_machines/v0.3.0...quorum_machines/v0.3.1) (2026-11-14)
 
 
