@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.3.0...quorum-machines-v0.3.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* name the offending argument in conversion errors and compact quorum tests ([dbb792b](https://github.com/seuros/quorum_machines/commit/dbb792baccabb3f64264f0b89b94fcff48b64537))
+
 ## [0.3.0](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.2.2...quorum-machines-v0.3.0) (2026-11-13)
 
 
