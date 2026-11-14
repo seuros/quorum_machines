@@ -2,6 +2,7 @@
 mod model;
 
 use super::*;
+use matryona_machines::testing::{refuses, unchanged};
 
 /// A fresh majority of five: three distinct acknowledgements reach it.
 fn five() -> Quorum<5> {
@@ -12,10 +13,11 @@ fn five() -> Quorum<5> {
 fn distinct_members_not_messages_reach_majority() {
     let mut quorum = five();
     assert_eq!(quorum.acknowledge(0), Ok(Acknowledgement::Counted));
-    let once = quorum.clone();
     for _ in 0..10 {
-        assert_eq!(quorum.acknowledge(0), Ok(Acknowledgement::Duplicate));
-        assert_eq!(quorum, once);
+        assert_eq!(
+            unchanged(&mut quorum, |q| q.acknowledge(0)),
+            Ok(Acknowledgement::Duplicate)
+        );
     }
     assert_eq!(quorum.count(), 1);
     assert!(!quorum.reached());
@@ -32,10 +34,10 @@ fn distinct_members_not_messages_reach_majority() {
 fn an_unknown_member_is_refused_and_changes_nothing() {
     let mut quorum = five();
     assert_eq!(quorum.acknowledge(1), Ok(Acknowledgement::Counted));
-    let before = quorum.clone();
     for member in [5, 6, usize::MAX] {
-        assert_eq!(quorum.acknowledge(member), Err(Refusal::UnknownMember));
-        assert_eq!(quorum, before);
+        refuses(&mut quorum, Refusal::UnknownMember, |q| {
+            q.acknowledge(member)
+        });
     }
 }
 
@@ -46,10 +48,8 @@ fn a_seat_past_the_membership_is_unknown_even_within_capacity() {
     let mut quorum = Quorum::<64>::new(3, 2).expect("valid quorum");
     assert_eq!((quorum.members(), quorum.required()), (3, 2));
     assert_eq!(Quorum::<64>::CAPACITY, 64);
-    let before = quorum.clone();
-    assert_eq!(quorum.acknowledge(3), Err(Refusal::UnknownMember));
-    assert_eq!(quorum.acknowledge(63), Err(Refusal::UnknownMember));
-    assert_eq!(quorum, before);
+    refuses(&mut quorum, Refusal::UnknownMember, |q| q.acknowledge(3));
+    refuses(&mut quorum, Refusal::UnknownMember, |q| q.acknowledge(63));
     assert_eq!(quorum.acknowledge(2), Ok(Acknowledgement::Counted));
     assert_eq!(Quorum::<64>::majority(3).map(|q| q.required()), Some(2));
     assert_eq!(Quorum::<64>::majority(64).map(|q| q.required()), Some(33));

@@ -165,7 +165,7 @@ Run it in a test against your configuration so nobody tunes `reads` down to 1 "f
 - **Membership is 1 to 64** seats, indexed from zero. `Quorum::CAPACITY` holds the ceiling. It is the core's own `Quorum::CAPACITY`, the const generic `N` this gem compiles as 64, not a rule Ruby adds.
 - **`required` is 1 to `members`.** Zero, more than the roster, or a roster past the ceiling raises `RangeError`.
 - **Arguments are positional**, in the core's order: `Quorum.new(members, required)`, `Quorum.majority(members)`, `intersects?(members, reads, writes)`. There are no keywords and no defaults.
-- **Integers only.** A Float member or threshold raises `TypeError`. A negative member raises `RangeError`. The message names the argument, so a Hash passed where `members` belongs says `members must be an Integer, not Hash`. `ArgumentError` only ever comes from Ruby itself, for arity.
+- **Integers only.** A Float member or threshold raises `TypeError`. A negative member raises `RangeError`. The message names the argument, so a Hash passed where `members` belongs says `members must be an Integer`. `ArgumentError` only ever comes from Ruby itself, for arity.
 - **Conversions come first.** Every argument is checked before the core is asked, and afterwards the binding only turns the core's answer into a symbol, so a raise never costs an acknowledgement.
 - **A refusal is a symbol, never an exception, and changes nothing.** Acknowledging a seat past the roster answers `:unknown_member`.
 - **A repeat is honoured.** The tracker keeps one mark per seat, so it knows a member already answered and says `:duplicate`. Nothing changes.

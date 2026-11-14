@@ -52,17 +52,17 @@ class QuorumNativeTest < Minitest::Test
     assert_raises(ArgumentError) { Q.new(3) }
     assert_raises(ArgumentError) { Q.new(members: 3, required: 2) }
     error = assert_raises(TypeError) { Q.new({ members: 3 }, 2) }
-    assert_equal 'members must be an Integer, not Hash', error.message
+    assert_equal 'members must be an Integer', error.message
     error = assert_raises(TypeError) { Q.new(3, nil) }
-    assert_equal 'required must be an Integer, not NilClass', error.message
+    assert_equal 'required must be an Integer', error.message
     error = assert_raises(TypeError) { Q.majority(members: 3) }
-    assert_equal 'members must be an Integer, not Hash', error.message
+    assert_equal 'members must be an Integer', error.message
     error = assert_raises(RangeError) { Q.new(-1, 2) }
     assert_equal 'members must be in 0..=18446744073709551615', error.message
     error = assert_raises(TypeError) { Q.new(3, 2).acknowledge(:a) }
-    assert_equal 'member must be an Integer, not Symbol', error.message
+    assert_equal 'member must be an Integer', error.message
     error = assert_raises(TypeError) { QuorumMachines.intersects?(3, 2, writes: 2) }
-    assert_equal 'writes must be an Integer, not Hash', error.message
+    assert_equal 'writes must be an Integer', error.message
     assert_raises(TypeError) { Q.allocate }
     quorum = Q.new(3, 2)
     assert_raises(TypeError) { quorum.acknowledge(1.0) }
@@ -71,6 +71,9 @@ class QuorumNativeTest < Minitest::Test
     quorum.freeze
     assert_raises(FrozenError) { quorum.acknowledge(1) }
     assert_raises(FrozenError) { quorum.reset }
+    # Frozen is checked before the argument is converted.
+    assert_raises(FrozenError) { quorum.acknowledge('1') }
+    assert_raises(FrozenError) { quorum.acknowledge(-1) }
     assert_equal 0, quorum.count
   end
 

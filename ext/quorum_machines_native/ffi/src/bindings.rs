@@ -1,5 +1,6 @@
 use magnus::typed_data::Obj;
-use magnus::{Error, Integer, Ruby, Symbol, TryConvert, Value, function, method, prelude::*};
+use magnus::{Error, Ruby, Symbol, Value, function, method, prelude::*};
+use matryona_machines::ruby::{Symbols, integer};
 use quorum_machines::{Acknowledgement, Quorum, Refusal};
 use std::cell::RefCell;
 
@@ -8,33 +9,18 @@ const CAPACITY: usize = 64;
 
 type Core = Quorum<CAPACITY>;
 
-/// A count or seat index, named in every message so the caller sees which
-/// argument was wrong. A Hash here is a caller who used keywords.
-fn count(ruby: &Ruby, value: Value, name: &str) -> Result<usize, Error> {
-    if Integer::from_value(value).is_none() {
-        return Err(Error::new(
-            ruby.exception_type_error(),
-            format!("{name} must be an Integer, not {}", value.class()),
-        ));
-    }
-    usize::try_convert(value).map_err(|_| {
-        Error::new(
-            ruby.exception_range_error(),
-            format!("{name} must be in 0..={}", usize::MAX),
-        )
-    })
-}
-
-const fn refusal(refusal: Refusal) -> &'static str {
-    match refusal {
-        Refusal::UnknownMember => "unknown_member",
+matryona_machines::symbols! {
+    /// The core's refusals as Symbols: the snake case of each variant.
+    Refusals for Refusal as "a refusal" {
+        UnknownMember => "unknown_member",
     }
 }
 
-const fn acknowledgement(acknowledgement: Acknowledgement) -> &'static str {
-    match acknowledgement {
-        Acknowledgement::Counted => "counted",
-        Acknowledgement::Duplicate => "duplicate",
+matryona_machines::symbols! {
+    /// The core's honoured `acknowledge` answers as Symbols.
+    Acknowledgements for Acknowledgement as "an acknowledgement" {
+        Counted => "counted",
+        Duplicate => "duplicate",
     }
 }
 
@@ -52,26 +38,29 @@ impl Tracker {
     }
 
     fn new(ruby: &Ruby, members: Value, required: Value) -> Result<Self, Error> {
-        let members = count(ruby, members, "members")?;
-        let required = count(ruby, required, "required")?;
+        let members = integer(members, "members")?;
+        let required = integer(required, "required")?;
         Self::build(ruby, Core::new(members, required))
     }
 
     fn majority(ruby: &Ruby, members: Value) -> Result<Self, Error> {
-        let members = count(ruby, members, "members")?;
+        let members = integer(members, "members")?;
         Self::build(ruby, Core::majority(members))
     }
 
     fn acknowledge(ruby: &Ruby, this: Obj<Self>, member: Value) -> Result<Symbol, Error> {
         this.check_frozen()?;
         // Every conversion happens before the core is asked.
-        let member = count(ruby, member, "member")?;
+        let member = integer(member, "member")?;
         let outcome = this.0.borrow_mut().acknowledge(member);
-        Ok(ruby.to_symbol(outcome.map_or_else(refusal, acknowledgement)))
+        Ok(match outcome {
+            Ok(acknowledgement) => Acknowledgements::symbol(ruby, acknowledgement),
+            Err(refusal) => Refusals::symbol(ruby, refusal),
+        })
     }
 
-    fn acknowledged(ruby: &Ruby, this: &Self, member: Value) -> Result<bool, Error> {
-        let member = count(ruby, member, "member")?;
+    fn acknowledged(this: &Self, member: Value) -> Result<bool, Error> {
+        let member = integer(member, "member")?;
         Ok(this.0.borrow().acknowledged(member))
     }
 
@@ -98,10 +87,10 @@ impl Tracker {
     }
 }
 
-fn intersects(ruby: &Ruby, members: Value, reads: Value, writes: Value) -> Result<bool, Error> {
-    let members = count(ruby, members, "members")?;
-    let reads = count(ruby, reads, "reads")?;
-    let writes = count(ruby, writes, "writes")?;
+fn intersects(members: Value, reads: Value, writes: Value) -> Result<bool, Error> {
+    let members = integer(members, "members")?;
+    let reads = integer(reads, "reads")?;
+    let writes = integer(writes, "writes")?;
     Ok(quorum_machines::intersects(members, reads, writes))
 }
 
