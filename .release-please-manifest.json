@@ -1,5 +1,5 @@
 {
-  ".": "0.3.0",
+  ".": "0.3.1",
   "ext/quorum_machines_native/core": "0.4.0",
   "ext/quorum_machines_native/ffi": "0.1.6"
 }
