@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.3.1...quorum-machines-v0.4.0) (2026-11-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* adopt matryona-machines 0.2 (symbols! tables)
+
+### Features
+
+* adopt matryona-machines 0.2 (symbols! tables) ([a5d4b53](https://github.com/seuros/quorum_machines/commit/a5d4b5369c873d4759130496269333b9474d9c86))
+
 ## [0.3.1](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.3.0...quorum-machines-v0.3.1) (2026-11-14)
 
 
