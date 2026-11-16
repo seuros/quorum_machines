@@ -1,4 +1,5 @@
 #![no_std]
+#![cfg_attr(not(test), deny(clippy::indexing_slicing))]
 #![doc = include_str!("../README.md")]
 
 use core::fmt;
@@ -64,6 +65,7 @@ impl<const N: usize> Quorum<N> {
     /// `None` unless `1 <= members <= N`.
     #[must_use]
     pub const fn majority(members: usize) -> Option<Self> {
+        // `members / 2 < usize::MAX`, so the `+ 1` cannot overflow.
         Self::new(members, members / 2 + 1)
     }
 
@@ -84,6 +86,8 @@ impl<const N: usize> Quorum<N> {
             return Ok(Acknowledgement::Duplicate);
         }
         *seen = true;
+        // Each roster seat flips `seen` once per round, so `count <= members`
+        // and the increment cannot overflow.
         self.count += 1;
         Ok(Acknowledgement::Counted)
     }
@@ -128,6 +132,7 @@ impl<const N: usize> Quorum<N> {
 /// Whether two nonempty thresholds necessarily intersect within one membership.
 #[must_use]
 pub const fn intersects(members: usize, reads: usize, writes: usize) -> bool {
+    // `writes <= members` is checked first, so `members - writes` cannot wrap.
     reads > 0 && writes > 0 && reads <= members && writes <= members && reads > members - writes
 }
 

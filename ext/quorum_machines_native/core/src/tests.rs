@@ -1,8 +1,7 @@
-#![allow(clippy::expect_used)]
 mod model;
 
 use super::*;
-use matryona_machines::testing::{refuses, unchanged};
+use matryona_machines::testing::{describes, refuses, unchanged};
 
 /// A fresh majority of five: three distinct acknowledgements reach it.
 fn five() -> Quorum<5> {
@@ -89,8 +88,8 @@ fn a_new_round_has_no_previous_acknowledgements() {
 
 #[test]
 fn refusals_describe_themselves() {
-    extern crate std;
-    use std::string::ToString;
-    let error: &dyn core::error::Error = &Refusal::UnknownMember;
-    assert_ne!(error.to_string(), "");
+    describes(&[(
+        Refusal::UnknownMember,
+        "the index names no seat of the membership",
+    )]);
 }
