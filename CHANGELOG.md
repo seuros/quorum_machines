@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/seuros/quorum_machines/compare/quorum_machines/v0.3.3...quorum_machines/v0.3.4) (2026-11-16)
+
+
+### Bug Fixes
+
+* fix wrapped classes at load so building a value runs no Ruby ([03b6b00](https://github.com/seuros/quorum_machines/commit/03b6b002ec28312188c332b36939f5c8a38ef728))
+
 ## [0.3.3](https://github.com/seuros/quorum_machines/compare/quorum_machines/v0.3.2...quorum_machines/v0.3.3) (2026-11-16)
 
 
