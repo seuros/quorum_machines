@@ -1,4 +1,5 @@
 use magnus::{Error, Ruby, function, method, prelude::*};
+use matryona_machines::ruby::Class;
 
 use crate::{Core, Tracker, intersects};
 
@@ -19,5 +20,8 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method("count", method!(Tracker::count, 0))?;
     class.define_method("members", method!(Tracker::members, 0))?;
     class.define_method("required", method!(Tracker::required, 0))?;
-    class.define_method("reset", method!(Tracker::reset, 0))
+    class.define_method("reset", method!(Tracker::reset, 0))?;
+    // `new` and `majority` answer a Quorum: its class is fixed now, so
+    // building one never runs `Object.const_get`.
+    Class::pin_wrapped::<Tracker>(ruby, class).map(drop)
 }
