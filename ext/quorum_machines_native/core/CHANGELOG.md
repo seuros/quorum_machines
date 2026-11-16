@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.4.0...quorum-machines-v0.4.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* deny slice indexing in core and rebuild on matryona 0.5 ([eeda948](https://github.com/seuros/quorum_machines/commit/eeda9487b625f7b4af94bdcd676e249e24369e2f))
+
 ## [0.4.0](https://github.com/seuros/quorum_machines/compare/quorum-machines-v0.3.1...quorum-machines-v0.4.0) (2026-11-14)
 
 
